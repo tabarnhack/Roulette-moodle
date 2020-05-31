@@ -1,29 +1,22 @@
-# moodle_roulette
+Roulette Moodle
+===============
 
-## Project setup
-```
-yarn install
-```
+Une roulette pour donner du suspense sur les notes données à travers une plateforme Moodle.
 
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
+# Getting started
 
-### Compiles and minifies for production
-```
-yarn build
-```
+Il faut lancer une instance en local afin de pouvoir tester la roulette.
 
-### Run your unit tests
-```
-yarn test:unit
-```
+## Dépendences
 
-### Lints and fixes files
+Pour build le projet, il y a besoin des paquets suivants:
+- docker
+- docker-compose
+
+Il faut ensuite lancer la commande suivante
+
 ```
-yarn lint
+docker-compose up
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+# TODO
