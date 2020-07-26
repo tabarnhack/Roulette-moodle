@@ -1,6 +1,6 @@
 <template>
     <div id="wheel" class="small-container">
-        <student-form v-if="!seen" @login:student="loginStudent" />
+        <student-form v-if="!seen" @login:student="loginStudent" @check:student="checkStudent" />
         <font-awesome-icon v-if="seen" @click="handleClick" icon="sync" />
         <pulse-loader :loading="loading" />
         <grade-options v-if="seen" :grades="grades" @change:grade="changeGrade" :key="refreshGrades" />
@@ -83,6 +83,27 @@ export default {
             API.login(student).then(json => {
                 if(json.status === "error")
                     return Promise.reject(json.error)
+                return API.grades()
+            }).then(json => {
+                if(json.status === "error")
+                    return Promise.reject(json.error)
+                this.grades = json.items
+                this.rerenderGrades()
+                this.seen = true
+            }).catch(e => {
+                this.msg = e
+                this.err = true
+            }).finally(() => {
+                this.loading = false
+            });
+        },
+        checkStudent(cookie) {
+            this.loading = true
+            this.err = false
+            this.$cookie.set('MoodleSession', cookie, {domain: process.env.VUE_APP_ROOT_API})
+            API.check().then(json => {
+                if(json.status === "error")
+                    return Promise.reject(json.error)
                 return API.courses()
             }).then(json => {
                 if(json.status === "error")
@@ -137,7 +158,7 @@ export default {
         },
         handleClick() {
             this.loading = true
-            API.courses().then(json => {
+            API.grades().then(json => {
                 if(json.status === "error")
                     return Promise.reject(json.error)
                 this.grades = json.items

@@ -3,7 +3,7 @@
         <form>
             <label for="grades">Grades</label>
             <select name="grades" v-model="gradeChoice" @change="handleChange">
-                <option v-for="grade in grades" :key="grade.itemname" :value="grade.itemname">{{ grade.itemname }}</option>
+                <option v-for="grade in grades" :key="grade.id" :value="grade.id">{{ grade.name }}</option>
             </select> 
         </form>
     </div>

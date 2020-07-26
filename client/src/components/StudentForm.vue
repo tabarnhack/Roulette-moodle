@@ -7,6 +7,12 @@
             <input name="password" v-model="student.password" type="password" />
             <button>Login</button>
         </form>
+        OR
+        <form @submit.prevent="handleSubmitCookie">
+            <label for="cookie">Moodle Session ID</label>
+            <input name="cookie" v-model="cookie" type="text" />
+            <button>Check</button>
+        </form>
     </div>
 </template>
 
@@ -19,11 +25,15 @@ export default {
                 username: '',
                 password: '',
             },
+            cookie: ''
         }
     },
     methods: {
         handleSubmit() {
             this.$emit('login:student', this.student)
+        },
+        handleSubmitCookie() {
+            this.$emit('check:student', this.cookie)
         },
     },
 }

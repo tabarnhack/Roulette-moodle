@@ -5,7 +5,7 @@
       <router-link to="/wheel">Wheel</router-link> |
       <router-link to="/about">About</router-link>
     </div>
-    <keep-alive inclde="wheel">
+    <keep-alive include="wheel">
     <router-view/>
     </keep-alive>
   </div>
@@ -18,6 +18,7 @@
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  margin-top: 60px;
 }
 
 #nav {
