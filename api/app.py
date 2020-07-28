@@ -2,6 +2,11 @@ import requests
 from bs4 import BeautifulSoup
 from flask import Flask, request, abort, make_response
 from flask_cors import CORS
+import urllib.parse as urlparse
+from urllib.parse import parse_qs
+
+import re
+import codecs
 
 app = Flask(__name__)
 cors = CORS(app, supports_credentials=True)
@@ -53,8 +58,49 @@ def login_post():
     return res
 
 
-@app.route('/grade', methods=["GET"])
-def grade():
+@app.route('/check', methods=['GET'])
+def check():
+    if "MoodleSession" not in request.cookies:
+        abort(401, description="You must first login via /login")
+
+    cookies = {"MoodleSession": request.cookies.get("MoodleSession")}
+    r = requests.get(f"{app.config['MOODLE_URL']}/my/", cookies=cookies, allow_redirects=False)
+
+    if r.status_code == 200:
+        res = make_response({"status": "Connected"}, 200)
+    else:
+        abort(401, description="The connection was not successful")
+    return res
+
+
+@app.route('/courses', methods=['GET'])
+def courses():
+    if "MoodleSession" not in request.cookies:
+        abort(401, description="You must first login via /login")
+
+    cookies = {"MoodleSession": request.cookies.get("MoodleSession")}
+    r = requests.get(f"{app.config['MOODLE_URL']}/grade/report/overview/", cookies=cookies, allow_redirects=False)
+
+    if r.status_code != 200:
+        abort(401, description="You must first login via /login")
+
+    html = r.text
+
+    soup = BeautifulSoup(html, "html.parser")
+    table = soup.select("td.cell.c0")
+
+    courses = []
+    for course in table:
+        ident = course.find('a').get("href")
+        content = course.get_text()
+        parsed = urlparse.urlparse(ident)
+        courses += [{"id": int(urlparse.parse_qs(parsed.query)['id'][0]), "name": content}]
+
+    return {"items": courses}
+
+
+@app.route('/grades', methods=["GET"])
+def grades():
     if "MoodleSession" not in request.cookies:
         abort(401, description="You must first login via /login")
 
@@ -64,19 +110,39 @@ def grade():
     course_id = request.args.get("id")
     
     cookies = {"MoodleSession": request.cookies.get("MoodleSession")}
-    r = requests.get(f"{app.config['MOODLE_URL']}/grade/report/user/index.php?id={course_id}", cookies=cookies)
+    r = requests.get(f"{app.config['MOODLE_URL']}/grade/report/user/?id={course_id}", cookies=cookies)
     html = r.text
 
     soup = BeautifulSoup(html, "html.parser")
-    table_text = soup.find("table", {"class": "user-grade"}).text
 
     table = soup.find("table", {"class": "user-grade"})
 
-    headers = [header["class"][-1].split('-')[-1] for header in table.select("thead tr th")]
+    maxlevel = 1
+    clslevel = re.compile(r"level\d+")
+    nums = re.compile(r"\d+$")
+    for grade in table.find("tbody").find_all("td", {"class": clslevel}):
+        lev = int(nums.findall(list(filter(clslevel.match, grade["class"]))[0])[0])
+        if lev > maxlevel:
+            maxlevel = lev
 
-    results = [{headers[headers.index(cell["class"][-1].split('-')[-1])]: cell.text for cell in row.find_all(["th", "td"])} for row in table.select("tbody tr")[1:-1]]
+    grades = []
+    for grade in table.find("tbody").find_all("tr"):
+        if not grade.select(f".level{maxlevel}") or len(grade.contents) == 1:
+            continue
 
-    return {"items": results}
+        name = grade.find("th", {"class": "column-itemname"})
+        link = name.find("a")
+        if not link:
+            continue
+        ident = link.get("href")
+        parsed = urlparse.urlparse(ident)
+
+        content = name.get_text()
+        val = grade.find("td", {"class": "column-grade"}).get_text()
+        ranges = grade.find("td", {"class": "column-range"}).get_text()
+        grades += [{"id": int(urlparse.parse_qs(parsed.query)['id'][0]), "name": content, "range": ranges, "grade": val}]
+
+    return {"items": grades}
 
 @app.errorhandler(404)
 def not_found(error):

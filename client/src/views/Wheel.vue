@@ -3,13 +3,15 @@
         <student-form v-if="!seen" @login:student="loginStudent" @check:student="checkStudent" />
         <font-awesome-icon v-if="seen" @click="handleClick" icon="sync" />
         <pulse-loader :loading="loading" />
-        <grade-options v-if="seen" :grades="grades" @change:grade="changeGrade" :key="refreshGrades" />
+        <grade-options v-if="seen" :grades="courses" @choose:grade="changeCourse">Courses</grade-options>
+        <grade-options v-if="seen && grades.length > 0" :grades="grades" @choose:grade="changeGrade">Grades</grade-options>
+        <div ref="container"></div>
         <box v-if="err" :active="true" :type="'warning'">
             <div slot="box-body">
                 {{ msg }}
             </div>
         </box>
-        <roulette v-if="seen && !err" :ready="state" :segments="options" :prizeNumber="prize" :key="componentKey"/>
+        <roulette v-if="seen && !err" :ready="state" :segments="options" :prizeNumber="prize" :key="rouletteKey"/>
     </div>
 </template>
 
@@ -37,10 +39,12 @@ export default {
             msg: "",
             err: false,
             loading: false,
-            componentKey: 0,
             refreshGrades: 0,
+            refreshCourses: 0,
+            rouletteKey: 0,
             seen: false,
             grades: [],
+            courses: [],
             prize: 3,
             options: [
                 {
@@ -83,12 +87,11 @@ export default {
             API.login(student).then(json => {
                 if(json.status === "error")
                     return Promise.reject(json.error)
-                return API.grades()
+                return API.courses()
             }).then(json => {
                 if(json.status === "error")
                     return Promise.reject(json.error)
-                this.grades = json.items
-                this.rerenderGrades()
+                this.courses = json.items
                 this.seen = true
             }).catch(e => {
                 this.msg = e
@@ -100,7 +103,7 @@ export default {
         checkStudent(cookie) {
             this.loading = true
             this.err = false
-            this.$cookie.set('MoodleSession', cookie, {domain: process.env.VUE_APP_ROOT_API})
+            this.$cookies.set('MoodleSession', cookie, 0)
             API.check().then(json => {
                 if(json.status === "error")
                     return Promise.reject(json.error)
@@ -108,8 +111,7 @@ export default {
             }).then(json => {
                 if(json.status === "error")
                     return Promise.reject(json.error)
-                this.grades = json.items
-                this.rerenderGrades()
+                this.courses = json.items
                 this.seen = true
             }).catch(e => {
                 this.msg = e
@@ -118,16 +120,27 @@ export default {
                 this.loading = false
             });
         },
-        forceRerender() {
-            this.componentKey++
-        },
-        rerenderGrades() {
-            this.refreshGrades++
+        changeCourse(choice) {
+            this.loading = true
+            this.err = false
+            API.grades(choice).then(json => {
+                if(json.status === "error")
+                    return Promise.reject(json.error)
+                this.grades = json.items
+            }).catch(e => {
+                this.msg = e
+                this.err = true
+            }).finally(() => {
+                this.loading = false
+            });
         },
         changeGrade(grade) {
+            console.log("We have called me")
             this.err = false
             this.state = false
-            let found = this.grades.find(elem => elem.itemname === grade)
+            let found = this.grades.find(elem => elem.id === grade)
+
+            console.log(found, this.grades, grade)
 
             if(found === undefined) {
                 this.msg = "Cannot find the specified course please try another one"
@@ -154,19 +167,22 @@ export default {
 
             this.state = true
 
-            this.forceRerender();
+            this.forceRerender()
         },
         handleClick() {
             this.loading = true
-            API.grades().then(json => {
+            API.courses().then(json => {
                 if(json.status === "error")
                     return Promise.reject(json.error)
-                this.grades = json.items
-                this.rerenderGrades()
+                this.courses = json.items
+                this.grades = []
                 this.err = false
             }).catch(console.error).finally(() => {
                 this.loading = false
             });
+        },
+        forceRerender() {
+            this.rouletteKey++
         }
     }
 }

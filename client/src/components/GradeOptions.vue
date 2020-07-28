@@ -1,7 +1,7 @@
 <template>
     <div id="grade-options">
         <form>
-            <label for="grades">Grades</label>
+            <label for="grades"><slot></slot></label>
             <select name="grades" v-model="gradeChoice" @change="handleChange">
                 <option v-for="grade in grades" :key="grade.id" :value="grade.id">{{ grade.name }}</option>
             </select> 
@@ -13,7 +13,7 @@
 export default {
     name: "GradeOptions",
     props: {
-        grades: Array,
+        grades: Array
     },
     data() {
         return {
@@ -22,9 +22,16 @@ export default {
     },
     methods: {
         handleChange() {
-            this.$emit("change:grade", this.gradeChoice)
+            console.log("Grade options", this.$el, this.gradeChoice)
+            if(this.gradeChoice !== '' && this.gradeChoice !== undefined)
+                this.$emit('choose:grade', this.gradeChoice)
         }
     },
+    watch: {
+        grades: function() {
+            this.gradeChoice = ''
+        }
+    }
 }
 </script>
 

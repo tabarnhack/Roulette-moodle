@@ -1,8 +1,13 @@
 module.exports = {
     extends: [
         "eslint:recommended",
-        "plugin:vue/vue3-recommended"
+        "plugin:vue/base"
     ],
+    parser: "vue-eslint-parser",
+    parserOptions: {
+        parser: "babel-eslint",
+        sourceType: "module"
+    },
     env: {
         es6: true,
         browser: true,
