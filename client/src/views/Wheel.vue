@@ -2,14 +2,13 @@
     <div id="wheel" class="small-container">
         <student-form v-if="!seen" @login:student="loginStudent" @check:student="checkStudent" />
         <font-awesome-icon v-if="seen" @click="handleClick" icon="sync" />
+        <font-awesome-icon v-if="seen" @click="disconnect" icon="sign-out-alt" style="margin-left: 25px;" />
         <pulse-loader :loading="loading" />
         <grade-options v-if="seen" :grades="courses" @choose:grade="changeCourse">Courses</grade-options>
         <grade-options v-if="seen && grades.length > 0" :grades="grades" @choose:grade="changeGrade">Grades</grade-options>
         <div ref="container"></div>
         <box v-if="err" :active="true" :type="'warning'">
-            <div slot="box-body">
-                {{ msg }}
-            </div>
+            <div slot="box-body">{{ msg }}</div>
         </box>
         <roulette v-if="seen && !err" :ready="state" :segments="options" :prizeNumber="prize" :key="rouletteKey"/>
     </div>
@@ -85,11 +84,11 @@ export default {
             this.loading = true
             this.err = false
             API.login(student).then(json => {
-                if(json.status === "error")
+                if(json.status === 'error')
                     return Promise.reject(json.error)
                 return API.courses()
             }).then(json => {
-                if(json.status === "error")
+                if(json.status === 'error')
                     return Promise.reject(json.error)
                 this.courses = json.items
                 this.seen = true
@@ -110,7 +109,7 @@ export default {
                     return Promise.reject(json.error)
                 return API.courses()
             }).then(json => {
-                if(json.status === "error")
+                if(json.status === 'error')
                     return Promise.reject(json.error)
                 this.courses = json.items
                 this.seen = true
@@ -125,7 +124,7 @@ export default {
             this.loading = true
             this.err = false
             API.grades(choice).then(json => {
-                if(json.status === "error")
+                if(json.status === 'error')
                     return Promise.reject(json.error)
                 this.grades = json.items
             }).catch(e => {
@@ -141,11 +140,11 @@ export default {
             let found = this.grades.find(elem => elem.id === grade)
 
             if(found === undefined) {
-                this.msg = "Cannot find the specified course please try another one"
+                this.msg = 'Cannot find the specified course please try another one'
                 this.err = true
                 return
             } else if(found.grade === undefined || found.grade === '-') {
-                this.msg = "No grade for that course at the moment"
+                this.msg = 'No grade for that course at the moment'
                 this.err = true
                 return
             }
@@ -174,7 +173,7 @@ export default {
         handleClick() {
             this.loading = true
             API.courses().then(json => {
-                if(json.status === "error")
+                if(json.status === 'error')
                     return Promise.reject(json.error)
                 this.courses = json.items
                 this.grades = []
@@ -182,6 +181,10 @@ export default {
             }).catch(console.error).finally(() => {
                 this.loading = false
             });
+        },
+        disconnect() {
+            this.$cookies.remove('MoodleSession')
+            this.seen = false
         },
         forceRerender() {
             this.rouletteKey++

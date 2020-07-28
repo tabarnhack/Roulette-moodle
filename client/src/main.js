@@ -5,13 +5,10 @@ import './registerServiceWorker'
 import router from './router'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faSync } from '@fortawesome/free-solid-svg-icons'
+import { faSync, faSignOutAlt, faHeart, faCoffee } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
-// import VueCookie from 'vue-cookie'
-// Vue.use(VueCookie)
-
-library.add(faSync)
+library.add(faSync, faSignOutAlt, faHeart, faCoffee)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 import VueCookies from 'vue-cookies'

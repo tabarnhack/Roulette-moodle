@@ -43,4 +43,7 @@ export default {
   form {
     margin-bottom: 2rem;
   }
+  form > input {
+      color: #2c3e50;
+  }
 </style>

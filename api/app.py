@@ -50,6 +50,7 @@ def login_post():
     else:
         prev_url = app.config['MOODLE_URL']
 
+    # If we are not redirected to the login page
     if "MoodleSession" in session.cookies and prev_url != f"{app.config['MOODLE_URL']}/login/index.php":
         res = make_response({"status": "Connected", "cookie": session.cookies.get("MoodleSession")}, r.status_code)
         res.set_cookie("MoodleSession", session.cookies.get("MoodleSession"), secure=True, httponly=True)
@@ -66,6 +67,7 @@ def check():
     cookies = {"MoodleSession": request.cookies.get("MoodleSession")}
     r = requests.get(f"{app.config['MOODLE_URL']}/my/", cookies=cookies, allow_redirects=False)
 
+    # Unsuccessful connection redirect the user
     if r.status_code == 200:
         res = make_response({"status": "Connected"}, 200)
     else:
@@ -117,6 +119,7 @@ def grades():
 
     table = soup.find("table", {"class": "user-grade"})
 
+    # Assuming that all grades are located at the same level (ie the highest in the table)
     maxlevel = 1
     clslevel = re.compile(r"level\d+")
     nums = re.compile(r"\d+$")
