@@ -6,7 +6,7 @@
       <router-link to="/about">About</router-link>
     </div>
     <keep-alive include="wheel">
-    <router-view/>
+      <router-view/>
     </keep-alive>
   </div>
 </template>

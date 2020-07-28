@@ -22,7 +22,6 @@ export default {
     },
     methods: {
         handleChange() {
-            console.log("Grade options", this.$el, this.gradeChoice)
             if(this.gradeChoice !== '' && this.gradeChoice !== undefined)
                 this.$emit('choose:grade', this.gradeChoice)
         }

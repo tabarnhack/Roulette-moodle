@@ -25,7 +25,7 @@ export default {
     props: {
         segments: Array,
         prizeNumber: Number,
-        ready: Boolean
+        ready: Boolean,
     },
     data () {
         return {
@@ -65,7 +65,7 @@ export default {
                     }
                 })
 
-                let stopAt = this.theWheel.getRandomForSegment(this.prizeNumber);
+                let stopAt = this.theWheel.getRandomForSegment(this.prizeNumber)
                 this.theWheel.animation.stopAngle = stopAt
                 this.loadingPrize = false
                 this.theWheel.startAnimation()

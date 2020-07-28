@@ -103,7 +103,8 @@ export default {
         checkStudent(cookie) {
             this.loading = true
             this.err = false
-            this.$cookies.set('MoodleSession', cookie, 0)
+            if(cookie !== undefined)
+                this.$cookies.set('MoodleSession', cookie, 0)
             API.check().then(json => {
                 if(json.status === "error")
                     return Promise.reject(json.error)
@@ -135,12 +136,9 @@ export default {
             });
         },
         changeGrade(grade) {
-            console.log("We have called me")
             this.err = false
             this.state = false
             let found = this.grades.find(elem => elem.id === grade)
-
-            console.log(found, this.grades, grade)
 
             if(found === undefined) {
                 this.msg = "Cannot find the specified course please try another one"
@@ -162,7 +160,11 @@ export default {
                 this.prize = 6
             } else {
                 note -= mid
-                this.prize = 5 - Math.floor(note / step)
+                this.prize = 5 - Math.ceil(note / step)
+            }
+
+            if(this.prize === 0) { // Just to adjust so that it can trigger the grade A
+                this.prize++
             }
 
             this.state = true
@@ -183,6 +185,11 @@ export default {
         },
         forceRerender() {
             this.rouletteKey++
+        }
+    },
+    mounted() {
+        if(this.$cookies.isKey('MoodleSession')) {
+            this.checkStudent()
         }
     }
 }
