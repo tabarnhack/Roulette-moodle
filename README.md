@@ -17,7 +17,7 @@ De même pour l'url de l'api, il faut un fichier `.env.local` avec le contenu :
 VUE_APP_ROOT_API=<url de l'api>
 ```
 
-Note: pour une instance en local avec docker-compose, l'api est exposé sur `localhost:5000`.
+Note: pour une instance en local avec docker-compose, l'api est exposée sur `localhost:5000`.
 
 ## Dépendences
 
@@ -32,3 +32,5 @@ docker-compose up
 ```
 
 # TODO
+- Affichage des résultats
+- A voir...
